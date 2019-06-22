@@ -1,4 +1,7 @@
 #import "UtilityToolPlugin.h"
+#import <StoreKit/StoreKit.h>
+#import <UIKit/UIKit.h>
+#import "EmailAssistant.h"
 
 @implementation UtilityToolPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
@@ -10,11 +13,64 @@
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if ([@"getPlatformVersion" isEqualToString:call.method]) {
-    result([@"iOS " stringByAppendingString:[[UIDevice currentDevice] systemVersion]]);
-  } else {
-    result(FlutterMethodNotImplemented);
-  }
+    
+    if (![call.arguments isKindOfClass:[NSDictionary class]]) {
+        result([FlutterError errorWithCode:@"invalid_argument"
+                                   message:@"Argument type is not a Dictionary"
+                                   details:call.arguments]);
+        return;
+    }
+    if ([@"rateStore" isEqualToString:call.method]) {
+        NSDictionary * para = (NSDictionary*)call.arguments;
+        NSString * url = (NSString*)para[@"appStore"];
+        [self rateStore:url];
+        result(nil);
+    } else if ([@"shareApp" isEqualToString:call.method]) {
+        NSDictionary * para = (NSDictionary*)call.arguments;
+        NSString * url = (NSString*)para[@"url"];
+        NSString * title = (NSString*)para[@"title"];
+        [self shareApp:title url:url complete:^(BOOL success) {
+            result(@(success));
+        }];
+    } else if ([@"sendEmail" isEqualToString:call.method]) {
+        NSDictionary * para = (NSDictionary*)call.arguments;
+        NSString * receiver = (NSString*)para[@"receiver"];
+        [self sendEmail:receiver complete:^(BOOL success) {
+            result(@(success));
+        }];
+    } else {
+        result(FlutterMethodNotImplemented);
+    }
+}
+
+- (void)rateStore:(NSString*)url {
+    if (@available(iOS 10.3, *)) {
+        [SKStoreReviewController requestReview];
+    } else {
+        [UIApplication.sharedApplication openURL:[[NSURL alloc] initWithString:url]];
+    }
+}
+
+- (void)shareApp:(NSString*)title url:(NSString*)url complete:(void (^)(BOOL success))complete {
+    NSURL *shareURL = [NSURL URLWithString:url];
+    NSArray *activityItems = [[NSArray alloc] initWithObjects:title, shareURL, nil];
+    
+    UIActivityViewController *vc = [[UIActivityViewController alloc] initWithActivityItems:activityItems applicationActivities:nil];
+    
+    UIViewController * rootVc = UIApplication.sharedApplication.keyWindow.rootViewController;
+    UIActivityViewControllerCompletionWithItemsHandler block = ^(UIActivityType activityType, BOOL completed, NSArray *returnedItems, NSError *activityError) {
+        if (complete != NULL) {
+            complete(completed);
+        }
+        [rootVc dismissViewControllerAnimated:YES completion:nil];
+    };
+    vc.completionWithItemsHandler = block;
+    [rootVc presentViewController:vc animated:YES completion:nil];
+}
+
+- (void)sendEmail:(NSString*)receiver complete:(void (^)(BOOL success))complete {
+    EmailAssistant.share.receiver = receiver;
+    [EmailAssistant.share sendEmail:@"FeedBack" complete:complete];
 }
 
 @end
