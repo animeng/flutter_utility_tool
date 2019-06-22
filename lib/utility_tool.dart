@@ -22,4 +22,10 @@ class UtilityTool {
     final bool result = await _channel.invokeMethod('sendEmail',para);
     return result;
   }
+
+  static Future<bool> requestNetwork() async {
+    Map<String,dynamic> para = {};
+    final bool result = await _channel.invokeMethod('requestNetwork',para);
+    return result;
+  }
 }

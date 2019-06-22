@@ -38,6 +38,10 @@
         [self sendEmail:receiver complete:^(BOOL success) {
             result(@(success));
         }];
+    } else if ([@"requestNetwork" isEqualToString:call.method]) {
+        [self requestNetwork:^(BOOL success) {
+            result(@(success));
+        }];
     } else {
         result(FlutterMethodNotImplemented);
     }
@@ -71,6 +75,14 @@
 - (void)sendEmail:(NSString*)receiver complete:(void (^)(BOOL success))complete {
     EmailAssistant.share.receiver = receiver;
     [EmailAssistant.share sendEmail:@"FeedBack" complete:complete];
+}
+
+- (void)requestNetwork:(void (^)(BOOL success))complete {
+    NSURL * url = [[NSURL alloc] initWithString:@"https://apple.com"];
+    NSURLSessionDataTask * task = [[NSURLSession sharedSession] dataTaskWithURL:url completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        complete(error == NULL);
+    }];
+    [task resume];
 }
 
 @end
