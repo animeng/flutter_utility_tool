@@ -6,8 +6,14 @@ class UtilityTool {
   static const MethodChannel _channel =
       const MethodChannel('utility_tool');
 
-  static Future rateStore(String url) async {
-    Map<String,dynamic> para = {"appStore":url};
+  static Future rateStore({String appStoreId,String googlePlayId}) async {
+    Map<String,dynamic> para = {};
+    if (appStoreId != null) {
+      para["appStore"] = appStoreId;
+    }
+    if (googlePlayId != null) {
+      para["googlePlay"] = googlePlayId;
+    }
     await _channel.invokeMethod('rateStore',para);
   }
 

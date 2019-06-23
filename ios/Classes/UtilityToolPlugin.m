@@ -22,7 +22,8 @@
     }
     if ([@"rateStore" isEqualToString:call.method]) {
         NSDictionary * para = (NSDictionary*)call.arguments;
-        NSString * url = (NSString*)para[@"appStore"];
+        NSString * appId = (NSString*)para[@"appStore"];
+        NSString * url = [NSString stringWithFormat:@"http://itunes.apple.com/cn/app/id%@?mt=8",appId];
         [self rateStore:url];
         result(nil);
     } else if ([@"shareApp" isEqualToString:call.method]) {
