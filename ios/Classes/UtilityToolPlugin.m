@@ -49,11 +49,12 @@
 }
 
 - (void)rateStore:(NSString*)url {
-    if (@available(iOS 10.3, *)) {
-        [SKStoreReviewController requestReview];
-    } else {
-        [UIApplication.sharedApplication openURL:[[NSURL alloc] initWithString:url]];
-    }
+    // if (@available(iOS 10.3, *)) {
+    //     [SKStoreReviewController requestReview];
+    // } else {
+    //     [UIApplication.sharedApplication openURL:[[NSURL alloc] initWithString:url]];
+    // }
+    [UIApplication.sharedApplication openURL:[[NSURL alloc] initWithString:url]];
 }
 
 - (void)shareApp:(NSString*)title url:(NSString*)url complete:(void (^)(BOOL success))complete {
